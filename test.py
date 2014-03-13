@@ -2,14 +2,8 @@ from twisted.trial import unittest
 import irator
 import os
 
-def env(key):
-    if key in os.environ:
-        return os.environ[key]
-
-    return None
-
-character = env('ACHAEA_CHARACTER')
-password = env('ACHAEA_PASSWORD')
+character = os.environ.get('ACHAEA_CHARACTER', None)
+password = os.environ.get('ACHAEA_PASSWORD', None)
 
 class IratorTests(unittest.TestCase):
 
