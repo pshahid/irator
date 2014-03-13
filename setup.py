@@ -3,10 +3,10 @@ from setuptools import setup
 
 setup(
     name="irator",
-    version='0.1.0',
+    version='0.2.0',
     author='Jaiko',
     description="A Twisted-friendly Client for IRE's Irator API.",
-    url="http://packages.python.org/an_example_pypi_project",
+    url="https://github.com/spicerack/irator",
     py_modules= ['irator',],
-    install_requires=['twisted']
+    install_requires=['twisted', 'requests']
 )

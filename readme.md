@@ -6,6 +6,8 @@ A Twisted-friendly client implementation of IRE's Irator API.
 This is designed to work with Sage, which means it is meant to work inside the
 Twisted event loop, which of course means it uses Deferreds and callbacks. Yay? Well...anyways...
 
+There's also a class that doesn't require Twisted in the works...
+
 Usage
 -----
 
@@ -13,8 +15,8 @@ Usage
 
 Create a client instance with optional character authorization information:
 
-    from irator import Irator
-    client = Irator(character='Jaiko', password='sagerawksyersawks')
+    from irator import TwistedIrator
+    client = TwistedIrator(character='Jaiko', password='sagerawksyersawks')
 
 
 A basic callback to handle results and print them:

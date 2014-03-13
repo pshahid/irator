@@ -13,19 +13,91 @@ from twisted.internet.defer import inlineCallbacks, returnValue
 import json
 from datetime import datetime
 from urllib import urlencode
+import requests
 
 endpoint = 'http://api.achaea.com/'
 
-class Irator(object):
+class Unauthorized(Exception):
+    pass
+
+class BaseIrator(object):
+
+    def __init__(self, character=None, password=None):
+        self.character = character
+        self.password = password
+
+    def gamefeed(self, limit=None, id=None):
+        params = {}
+
+        if limit:
+            params['limit'] = limit
+
+        if id:
+            params['id'] = id
+
+        return self._request('gamefeed', params)
+
+    def orglogs(self, org, day=0):
+
+        orglog = self._request('orglogs/' + org.lower(), params={'day': day})
+
+        if orglog == 'Access denied':
+            raise Unauthorized('Access denied')
+
+        result = []
+        for line in orglog:
+            result.append({
+                'date': datetime.fromtimestamp(line['date']),
+                'event': str(line['event'])
+            })
+
+        return result
+
+    def news(self):
+        return self._request('news')
+
+
+class Irator(BaseIrator):
+
+    def characters(self, name=None):
+        if name is None:
+            response = self._request('characters')
+            result = {
+                'total': int(response['count']),
+                'characters': [str(c['name']) for c in response['characters']]
+            }
+        else:
+            response = self._request('characters/' + name)
+            result = response['fullname']
+
+        return result
+
+    def news_section(self, section, page=1):
+        pass
+
+    def news_article(self, section, article):
+        pass
+
+    def _request(self, resource, params={}):
+        resource += '.json'
+
+        if self.character and self.password:
+            params.update({
+                'character': self.character,
+                'password': self.password
+            })
+
+        r = requests.get(endpoint + resource, params=params)
+
+        return r.json()
+
+
+class TwistedIrator(BaseIrator):
 
     params = {
         'agent': 'Irator API Client',
         'method': 'GET',
     }
-
-    def __init__(self, character=None, password=None):
-        self.character = character
-        self.password = password
 
     @inlineCallbacks
     def characters(self, name=None):
@@ -40,9 +112,6 @@ class Irator(object):
             result = response['fullname']
 
         returnValue(result)
-
-    def news(self):
-        return self._request('news')
 
     @inlineCallbacks
     def news_section(self, section, page=1):
@@ -67,18 +136,9 @@ class Irator(object):
 
     @inlineCallbacks
     def orglogs(self, org=None, day=0):
+        result = super(TwistedIrator, self).orglogs(org=org, day=day)
 
-        if org:
-            orglog = yield self._request('orglogs/' + org.lower(), params={'day': day})
-            result = []
-            for line in orglog:
-                result.append({
-                    'date': datetime.fromtimestamp(line['date']),
-                    'event': str(line['event'])
-                })
-            returnValue(result)
-
-        returnValue(self._request('orglogs'))
+        returnValue(result)
 
     @inlineCallbacks
     def _request(self, resource, params={}):
