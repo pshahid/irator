@@ -68,7 +68,7 @@ class Irator(BaseIrator):
             }
         else:
             response = self._request('characters/' + name)
-            result = response['fullname']
+            result = response
 
         return result
 
@@ -109,7 +109,7 @@ class TwistedIrator(BaseIrator):
             }
         else:
             response = yield self._request('characters/' + name)
-            result = response['fullname']
+            result = response
 
         returnValue(result)
 
